@@ -1,9 +1,8 @@
 package it.unifi.cerm.playmorphia;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.typesafe.config.Config;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-
 import javax.inject.Inject;
 
 /**
@@ -11,57 +10,51 @@ import javax.inject.Inject;
  */
 public class MongoClientFactory {
 
-    protected Config config;
-    protected boolean isTest;
+  protected Config config;
+  protected boolean isTest;
 
-    public MongoClientFactory(Config config) {
-        this.config = config;
-    }
+  public MongoClientFactory(Config config) {
+    this.config = config;
+  }
 
-    @Inject
-    protected MongoClientFactory(Config config, boolean isTest) {
-        this.config = config;
-        this.isTest = isTest;
-    }
+  @Inject
+  protected MongoClientFactory(Config config, boolean isTest) {
+    this.config = config;
+    this.isTest = isTest;
+  }
 
-    /**
-     * Creates and returns a new instance of a MongoClient.
-     *
-     * @return a new MongoClient
-     * @throws Exception
-     */
-    public MongoClient createClient() throws Exception {
-        MongoClientURI uri = getClientURI();
-        MongoClient mongo = new MongoClient(uri);
-
-        return mongo;
-    }
+  /**
+   * Creates and returns a new instance of a MongoClient.
+   *
+   * @return a new MongoClient
+   */
+  public MongoClient createClient() {
+    return MongoClients.create(getClientURI());
+  }
 
 
-    /**
-     * Returns the database name associated with the current configuration.
-     *
-     * @return The database name
-     */
-    public String getDBName() {
-        return getClientURI().getDatabase();
-    }
+  /**
+   * Returns the database name associated with the current configuration.
+   *
+   * @return The database name
+   */
+  public String getDbName() {
+    return config.getString("playmorphia.database");
+  }
 
-    protected MongoClientURI getClientURI() {
-        MongoClientURI uri = new MongoClientURI(
-                isTest
-                        ? config.getString("playmorphia.test-uri")
-                        : config.getString("playmorphia.uri"));
-        return uri;
-    }
+  protected String getClientURI() {
+    return isTest
+            ? config.getString("playmorphia.test-uri")
+            : config.getString("playmorphia.uri");
+  }
 
-    /**
-     * Returns the models folder name associated with the current configuration.
-     *
-     * @return The models folder name
-     */
-    public String getModels() {
-        return config.getString("playmorphia.models");
-    }
+  /**
+   * Returns the models folder name associated with the current configuration.
+   *
+   * @return The models folder name
+   */
+  public String getModels() {
+    return config.getString("playmorphia.models");
+  }
 
 }

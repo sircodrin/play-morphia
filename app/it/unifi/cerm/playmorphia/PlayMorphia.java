@@ -1,7 +1,7 @@
 package it.unifi.cerm.playmorphia;
 
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 import com.typesafe.config.Config;
 import play.Environment;
 import play.inject.ApplicationLifecycle;
@@ -24,7 +24,7 @@ public class PlayMorphia {
     Morphia morphia = null;
 
     @Inject
-    public PlayMorphia(ApplicationLifecycle lifecycle, Environment env, Config config) {
+    public PlayMorphia(ApplicationLifecycle lifecycle, Environment env, Config config, MongoClientFactory factory) {
         try {
             configure(config, env.classLoader(), env.isTest());
         } catch (Exception e) {
@@ -54,14 +54,8 @@ public class PlayMorphia {
             throw new IllegalStateException("No MongoClient was created by instance of "+ factory.getClass().getName());
         }
 
-        morphia = new Morphia();
-
-        // Tell Morphia where to find our models
-        morphia.mapPackage(factory.getModels());
-
-        datastore = morphia.createDatastore(
-                mongo, factory.getDBName());
-
+        datastore = Morphia.createDatastore(mongo, factory.getDbName());
+        datastore.getMapper().mapPackage(factory.getModels());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
